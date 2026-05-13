@@ -1,0 +1,52 @@
+{
+  "name": "efeito-tunel-letras",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Animação vertical cinematográfica em Remotion, React Three Fiber e Three.js para túnel holográfico de palavras tecnológicas.",
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio src/index.ts",
+    "preview": "remotion preview src/index.ts",
+    "render": "remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --codec h264 --pixel-format yuv420p",
+    "render:prores": "remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mov --codec prores",
+    "validate": "tsc --noEmit",
+    "lint": "eslint . --ext .ts,.tsx --max-warnings=0",
+    "audio:synth": "node scripts/synthesize-ambience.mjs"
+  },
+  "keywords": [
+    "remotion",
+    "react-three-fiber",
+    "threejs",
+    "cinematic",
+    "generative-video"
+  ],
+  "author": "Iamazing School",
+  "license": "MIT",
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.17.10",
+    "@react-three/postprocessing": "^2.16.3",
+    "@remotion/cli": "^4.0.354",
+    "@remotion/renderer": "^4.0.354",
+    "@remotion/three": "^4.0.354",
+    "postprocessing": "^6.36.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.354",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.170.0",
+    "@typescript-eslint/eslint-plugin": "^8.16.0",
+    "@typescript-eslint/parser": "^8.16.0",
+    "eslint": "^9.16.0",
+    "eslint-plugin-react-hooks": "^5.1.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
