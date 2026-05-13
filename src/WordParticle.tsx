@@ -1,73 +1,99 @@
 import {Text} from '@react-three/drei';
-import {useCurrentFrame} from 'remotion';
-import {AdditiveBlending, BackSide, Color} from 'three';
-import {COLORS} from './constants';
-import {getWordState} from './utils/tunnel';
+import {memo, useMemo} from 'react';
+import {AdditiveBlending, Color, Euler, Vector3} from 'three';
+import {TECHNOLOGY_WORDS, TUNNEL_SETTINGS} from './utils/constants';
 
-type WordParticleProps = {
-  index: number;
+export type WordParticleProps = {
+  ringIndex: number;
+  wordIndex: number;
+  frame: number;
+  cameraProgress: number;
 };
 
-const cyan = new Color(COLORS.cyan);
-const white = new Color(COLORS.white);
+const tunnelDepth = TUNNEL_SETTINGS.rings * TUNNEL_SETTINGS.depthSpacing;
 
-export const WordParticle = ({index}: WordParticleProps) => {
-  const frame = useCurrentFrame();
-  const state = getWordState(index, frame);
-  const [x, y, z] = state.position;
-  const [rx, ry, rz] = state.rotation;
-  const trailCount = state.speedAlpha > 0.45 ? 3 : 2;
+export const WordParticle = memo(({ringIndex, wordIndex, frame, cameraProgress}: WordParticleProps) => {
+  const word = TECHNOLOGY_WORDS[wordIndex % TECHNOLOGY_WORDS.length];
+
+  const layout = useMemo(() => {
+    const baseAngle = (wordIndex / TUNNEL_SETTINGS.wordsPerRing) * Math.PI * 2;
+    const stagger = ringIndex * TUNNEL_SETTINGS.spiralTwist;
+    const radiusBias = 1 + Math.sin(ringIndex * 1.73 + wordIndex) * 0.055;
+    const depth = -ringIndex * TUNNEL_SETTINGS.depthSpacing - 4;
+
+    return {baseAngle, stagger, radiusBias, depth};
+  }, [ringIndex, wordIndex]);
+
+  const time = frame / 30;
+  const movingDepth = ((((layout.depth + cameraProgress) % tunnelDepth) + tunnelDepth) % tunnelDepth) - tunnelDepth;
+  const angle = layout.baseAngle + layout.stagger + time * 0.18 + Math.sin(time * 0.42 + ringIndex) * 0.035;
+  const radius = TUNNEL_SETTINGS.radius * layout.radiusBias + Math.sin(time + ringIndex * 0.31) * 0.18;
+
+  const position = new Vector3(
+    Math.cos(angle) * radius,
+    Math.sin(angle) * radius * 1.18,
+    movingDepth,
+  );
+
+  const rotation = new Euler(
+    Math.sin(time * 0.32 + wordIndex) * 0.08,
+    -angle + Math.PI / 2 + Math.sin(time * 0.21 + ringIndex) * 0.12,
+    Math.cos(time * 0.26 + ringIndex) * 0.1,
+  );
+
+  const nearCamera = Math.max(0, 1 - Math.abs(movingDepth + 2.4) / 8);
+  const opacity = Math.min(0.92, 0.22 + nearCamera * 0.62 + ringIndex * 0.006);
+  const size = word === 'Artificial Intelligence' || word === 'Machine Learning' ? 0.31 : 0.36;
+
+  const ghostOffset = 0.34;
+  const cyan = new Color('#38dcff');
+  const white = new Color('#f1fbff');
 
   return (
-    <group position={[x, y, z]} rotation={[rx, ry, rz]} scale={state.scale}>
-      {Array.from({length: trailCount}).map((_, trailIndex) => {
-        const offset = (trailIndex + 1) * 0.055 * (1 + state.speedAlpha);
-        const trailOpacity = state.opacity * (0.15 / (trailIndex + 1)) * (1 + state.speedAlpha * 0.8);
-
-        return (
-          <Text
-            key={`trail-${trailIndex}`}
-            anchorX="center"
-            anchorY="middle"
-            fontSize={0.62 + state.blur * 0.05 + trailIndex * 0.018}
-            letterSpacing={0.028}
-            outlineBlur={0.018 + state.blur * 0.024}
-            outlineColor={COLORS.cyan}
-            outlineOpacity={trailOpacity}
-            position={[-offset, offset * 0.2, 0.012 * (trailIndex + 1)]}
-          >
-            {state.text}
-            <meshBasicMaterial color={cyan} transparent opacity={trailOpacity} depthWrite={false} blending={AdditiveBlending} />
-          </Text>
-        );
-      })}
+    <group position={position} rotation={rotation}>
+      {[2, 1].map((ghost) => (
+        <Text
+          key={ghost}
+          position={[0, 0, ghost * ghostOffset]}
+          fontSize={size}
+          anchorX="center"
+          anchorY="middle"
+          letterSpacing={0.018}
+          maxWidth={3.4}
+        >
+          {word}
+          <meshBasicMaterial
+            color={cyan}
+            transparent
+            opacity={opacity * (0.08 / ghost)}
+            blending={AdditiveBlending}
+            depthWrite={false}
+          />
+        </Text>
+      ))}
 
       <Text
+        fontSize={size}
         anchorX="center"
         anchorY="middle"
-        fontSize={0.62}
-        letterSpacing={0.026}
-        outlineBlur={0.026 + state.blur * 0.018}
-        outlineColor={COLORS.cyanSoft}
-        outlineOpacity={state.opacity * state.glow * 0.38}
+        letterSpacing={0.018}
+        maxWidth={3.5}
       >
-        {state.text}
+        {word}
         <meshStandardMaterial
-          color={white.clone().lerp(cyan, 0.32)}
+          color={white}
           emissive={cyan}
-          emissiveIntensity={0.95 + state.glow * 1.9}
-          roughness={0.42}
-          metalness={0.18}
+          emissiveIntensity={1.9 + nearCamera * 1.6}
           transparent
-          opacity={state.opacity}
+          opacity={opacity}
+          roughness={0.28}
+          metalness={0.05}
+          blending={AdditiveBlending}
           depthWrite={false}
         />
       </Text>
-
-      <mesh scale={[1.08 + state.blur * 0.12, 0.28 + state.blur * 0.05, 1]} position={[0, 0, -0.015]}>
-        <planeGeometry args={[state.text.length * 0.43, 0.92]} />
-        <meshBasicMaterial color={COLORS.cyan} transparent opacity={state.opacity * state.glow * 0.055} blending={AdditiveBlending} side={BackSide} depthWrite={false} />
-      </mesh>
     </group>
   );
-};
+});
+
+WordParticle.displayName = 'WordParticle';

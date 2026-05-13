@@ -1,60 +1,50 @@
-# Iamazing School — Holographic Tunnel Remotion
+# Efeito Túnel de Letras — Iamazing School
 
-Projeto completo em **Remotion + React Three Fiber + Three.js + TypeScript** para gerar um vídeo vertical 9:16 com um túnel holográfico futurista de palavras tecnológicas girando em espiral e avançando em direção à câmera.
+Projeto completo em **Remotion + React + React Three Fiber + Three.js + TypeScript** para gerar um vídeo vertical cinematográfico 9:16 com um túnel holográfico de palavras tecnológicas.
 
-## Conceito visual
+A direção visual é inspirada em comerciais premium de tecnologia corporativa, com linguagem elegante tipo AWS, NVIDIA, IBM Quantum, Azure e OpenAI: azul profundo, glow ciano, partículas holográficas, profundidade 3D, câmera macro comprimida e pós-processamento cinematográfico.
 
-- **Texto central:** `Iamazing School`.
-- **Palavras secundárias:** Cloud Computing, Big Data, API, Artificial Intelligence, Data Center, Machine Learning, Open Source, Cybersecurity e Cryptography.
-- **Estética:** comercial tecnológico premium inspirado em AWS, NVIDIA, IBM Quantum, Azure e OpenAI.
-- **Direção visual:** azul profundo, glow ciano, highlights brancos suaves, neblina volumétrica fake, partículas holográficas, contraste cinematográfico, motion blur visual simulado e formação gradual do título a partir de letras soltas.
-- **Negative prompt aplicado:** evitar neon oversaturado, visual gamer, cyberpunk exagerado, tremores bruscos, baixa resolução, texto plano sem profundidade e composição caótica.
+## Especificações do render
 
-## Configuração do vídeo
+- **Composição:** `IamazingTunnel`
+- **Resolução:** `1080x1920`
+- **Aspect ratio:** `9:16`
+- **FPS:** `30`
+- **Duração:** `8s` (`240` frames)
+- **Codec padrão:** MP4 H.264 com `yuv420p`
+- **Entrada Remotion:** `src/index.ts`
 
-| Item | Valor |
-| --- | --- |
-| Composition ID | `IamazingTunnel` |
-| Resolução | `1080x1920` |
-| Aspect ratio | `9:16` vertical |
-| FPS | `30` |
-| Duração | `240 frames` / `8 segundos` |
-| Output local | `out/iamazing-tunnel.mp4` |
-| Codec | `h264` |
+## Stack técnica
 
-## Estrutura
+- Remotion
+- React
+- React Three Fiber
+- Three.js
+- `@react-three/drei`
+- `@react-three/postprocessing`
+- `postprocessing`
+- TypeScript
+
+## Estrutura principal
 
 ```txt
-.github/
-  workflows/
-    render.yml
 src/
-  index.ts
-  Composition.tsx
-  TunnelScene.tsx
-  WordParticle.tsx
-  CameraRig.tsx
-  Lighting.tsx
-  Effects.tsx
-  constants.ts
-  utils/
-    tunnel.ts
-public/
-  audio/
-    README.md
-package.json
-package-lock.json
-tsconfig.json
-remotion.config.ts
-.gitignore
-README.md
+ ├── Composition.tsx       # Registro da composição 1080x1920/30fps/8s
+ ├── TunnelScene.tsx       # Cena 3D, túnel procedural, partículas e áudio opcional
+ ├── WordParticle.tsx      # Palavra 3D individual com órbita helicoidal e ghost trails
+ ├── CameraRig.tsx         # Dolly-in, camera roll e micro drifting cinematográfico
+ ├── Lighting.tsx          # Luzes, fog e atmosfera azul/ciano
+ ├── Effects.tsx           # Bloom, DOF, noise, aberração cromática e vinheta
+ ├── hooks/
+ ├── utils/
+ └── shaders/
 ```
 
-## Instalação local
-
-> Use **npm**. Não use yarn ou pnpm neste projeto.
+## Instalação
 
 ```bash
+git clone <URL_DO_REPOSITORIO>
+cd EfeitoTunelLetras
 npm install
 ```
 
@@ -64,68 +54,87 @@ npm install
 npm run dev
 ```
 
-O comando abre o Remotion Studio para pré-visualizar a composição `IamazingTunnel`.
+Abra o Remotion Studio e selecione a composição `IamazingTunnel`.
 
-## Render local
+## Render MP4 H.264
 
 ```bash
 npm run render
 ```
 
-O MP4 será gerado em:
+Saída esperada:
 
 ```txt
 out/iamazing-tunnel.mp4
 ```
 
-O script usa `--gl=swangle` e `--concurrency=1` para manter o comportamento próximo ao pipeline headless do GitHub Actions.
+> A pasta `out/` e arquivos renderizados são ignorados pelo Git para manter o repositório limpo.
 
-## Render no GitHub Actions
+## Render com áudio
 
-O workflow está em `.github/workflows/render.yml` e roda automaticamente em todo `push` na branch `main`. Ele também pode ser executado manualmente em **Actions → Render Remotion Video → Run workflow**.
+Por regra do projeto, **binários não são versionados**. Para incluir trilha sonora:
 
-Pipeline executado:
+1. Gere um áudio base procedural opcional:
 
-1. Checkout fixo da `main`.
-2. Validação para impedir execução fora da `main`.
-3. Setup do Node.js 20 sem cache npm no `setup-node`.
-4. Instalação de dependências Linux para WebGL headless.
-5. Instalação com `npm ci` usando `package-lock.json`.
-6. Verificação do Remotion com `npx remotion versions`.
-7. Render com `xvfb-run -a`, `--gl=swangle`, `--concurrency=1` e timeout ampliado.
-8. Upload do MP4 como artifact chamado `iamazing-school-remotion-render`.
-
-Após a execução, baixe o vídeo na página do workflow em **Artifacts → iamazing-school-remotion-render**.
-
-## Áudio opcional
-
-O projeto suporta áudio via Remotion sem versionar binários pesados.
-
-1. Crie ou obtenha uma trilha MP3 leve com hum eletrônico suave, glitches digitais discretos, whooshes leves e atmosfera corporativa futurista.
-2. Salve localmente em:
-
-```txt
-public/audio/ambient-tech.mp3
+```bash
+npm run audio:synth
 ```
 
-Se o arquivo existir, a composição usa `<Audio />` automaticamente. Se não existir, o vídeo renderiza normalmente em silêncio.
+2. Se quiser MP3, converta localmente o WAV gerado para MP3 com sua ferramenta preferida e salve em:
+
+```txt
+public/audio/futuristic-ambience.mp3
+```
+
+3. Renderize com props:
+
+```bash
+npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 \
+  --codec h264 \
+  --pixel-format yuv420p \
+  --props='{"audioTrack":"audio/futuristic-ambience.mp3"}'
+```
+
+A cena já possui suporte à timeline de áudio via componente `<Audio />`; a trilha é opcional para que o repositório permaneça sem binários.
+
+## Workflow obrigatório na `main`
+
+Este repositório deve ser trabalhado diretamente na branch `main`:
+
+```bash
+git branch --show-current
+# main
+```
+
+Não crie branches `dev`, `test`, `staging`, `feature/*`, `hotfix/*` ou experimentais.
+
+## Como a animação é construída
+
+- As palavras secundárias são distribuídas por anéis em uma hélice 3D.
+- Cada palavra usa seno/cosseno para calcular `x`, `y` e profundidade `z`.
+- A câmera realiza um dolly-in contínuo, com roll mínimo e drift suave.
+- O túnel simula profundidade infinita reposicionando os anéis proceduralmente.
+- `Bloom`, `DepthOfField`, `Noise`, `ChromaticAberration` e `Vignette` criam o acabamento cinematográfico.
+- Ghost trails nas palavras simulam motion blur natural sem depender de arquivos externos.
+- Partículas instanciadas e geometria memoizada mantêm a renderização estável.
+
+## Validação
+
+```bash
+npm run validate
+npm run lint
+```
 
 ## Regras de repositório
 
-- Todo desenvolvimento ocorre exclusivamente na branch `main`.
-- Não criar branches `dev`, `test`, `staging`, `feature/*`, `hotfix/*` ou experimentais.
-- Não commitar `node_modules`, `out`, `dist`, `build`, caches, MP4 renderizado ou assets pesados.
-- O `.gitignore` bloqueia outputs, vídeos, imagens renderizadas, áudio binário e arquivos temporários.
-- O MP4 final deve ser baixado pelo artifact do GitHub Actions ou gerado localmente, nunca commitado.
+O `.gitignore` bloqueia:
 
-## Implementação procedural
+- `node_modules/`
+- caches
+- builds
+- vídeos renderizados
+- áudio binário
+- arquivos temporários
+- `.env` e segredos
 
-A distribuição das palavras usa matemática procedural com seno/cosseno e profundidade helicoidal:
-
-```ts
-x = Math.cos(angle) * radius;
-y = Math.sin(angle) * radius;
-z = depth - cameraProgress;
-```
-
-Cada palavra recebe posição 3D, escala por profundidade, opacidade por distância, rotação suave, glow ciano e trilhas translúcidas que simulam motion blur. As letras de `Iamazing School` começam separadas no túnel e convergem entre os frames 80 e 190 para formar o título central, permanecendo legíveis e com respiração sutil até o fim. A câmera aplica dolly-in contínuo, leve camera roll e micro drift cinematográfico para reforçar sensação de lente macro 85mm e shallow depth of field simulado.
+Versione apenas código-fonte, documentação e assets leves essenciais.
