@@ -1,0 +1,54 @@
+name: Render Remotion Video
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    name: Render MP4
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout MAIN
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Validate MAIN branch
+        run: |
+          if [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "Este workflow só pode rodar na MAIN."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb libgl1-mesa-dri libgl1-mesa-glx libegl1 libgles2 mesa-utils
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Verify Remotion
+        run: npx remotion versions
+
+      - name: Render video
+        run: xvfb-run -a npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=swangle --concurrency=1 --timeout=600000
+
+      - name: Upload rendered MP4
+        uses: actions/upload-artifact@v4
+        with:
+          name: iamazing-school-remotion-render
+          path: out/**/*.mp4
+          if-no-files-found: error
