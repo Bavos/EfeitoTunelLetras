@@ -1,22 +1,23 @@
 import {useFrame, useThree} from '@react-three/fiber';
-import {useCurrentFrame} from 'remotion';
+import {useMemo} from 'react';
 import {Vector3} from 'three';
-import {FPS} from './constants';
-
-const lookAtTarget = new Vector3(0, 0, -22);
+import {useTimeline} from './hooks/useTimeline';
 
 export const CameraRig = () => {
-  const frame = useCurrentFrame();
   const {camera} = useThree();
+  const {seconds, progress} = useTimeline();
+
+  const lookAt = useMemo(() => new Vector3(0, 0, -16), []);
 
   useFrame(() => {
-    const time = frame / FPS;
-    camera.position.x = Math.sin(time * 0.55) * 0.24 + Math.sin(time * 0.17) * 0.12;
-    camera.position.y = Math.cos(time * 0.43) * 0.18 + Math.sin(time * 0.29) * 0.08;
-    camera.position.z = 8.3 - time * 0.58;
-    camera.rotation.z = Math.sin(time * 0.32) * 0.035;
-    camera.lookAt(lookAtTarget.x + Math.sin(time * 0.24) * 0.22, lookAtTarget.y, lookAtTarget.z);
-    camera.rotation.z += Math.sin(time * 0.32) * 0.035;
+    const driftX = Math.sin(seconds * 0.58) * 0.18 + Math.sin(seconds * 1.17) * 0.045;
+    const driftY = Math.cos(seconds * 0.51) * 0.14 + Math.sin(seconds * 0.83) * 0.035;
+    const dollyZ = 6.3 - progress * 3.2;
+
+    camera.position.set(driftX, driftY, dollyZ);
+    lookAt.set(Math.sin(seconds * 0.3) * 0.32, Math.cos(seconds * 0.27) * 0.2, -18 - progress * 4);
+    camera.lookAt(lookAt);
+    camera.rotation.z += Math.sin(seconds * 0.42) * 0.018;
   });
 
   return null;

@@ -1,42 +1,49 @@
-# Dependencies
+# dependencies
 node_modules/
+.pnpm-store/
+.yarn/
 
-# Remotion / render outputs
+# Remotion / renders / media outputs
 out/
 dist/
 build/
 .cache/
-.cache-remotion/
 .remotion/
 *.mp4
 *.mov
 *.mkv
 *.webm
 *.avi
-*.png
-*.jpg
-*.jpeg
+*.wav
+*.aiff
+*.flac
+*.mp3
 
-# Heavy/local audio assets
+# local generated or heavy assets
 public/audio/*.mp3
 public/audio/*.wav
 public/audio/*.flac
-public/audio/*.aac
+public/audio/*.aiff
 public/audio/*.ogg
-!public/audio/README.md
+public/audio/*.m4a
 
-# Logs and temp files
+# logs
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-*.log
-*.tmp
-*.temp
+
+# OS / editors
 .DS_Store
 Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
 
-# Environment and secrets
+# env
 .env
 .env.*
 !.env.example
