@@ -1,0 +1,42 @@
+{
+  "name": "efeito-tunel-letras",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Projeto Remotion + React Three Fiber + Three.js para renderizar um túnel holográfico vertical de palavras da Iamazing School.",
+  "type": "module",
+  "scripts": {
+    "dev": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=angle --concurrency=1",
+    "render:ci": "xvfb-run -a npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=angle --concurrency=1 --timeout=600000",
+    "validate": "tsc --noEmit"
+  },
+  "keywords": [
+    "remotion",
+    "react-three-fiber",
+    "threejs",
+    "cinematic",
+    "generative-video",
+    "holographic-tunnel"
+  ],
+  "author": "Iamazing School",
+  "license": "MIT",
+  "dependencies": {
+    "@react-three/drei": "^9.122.0",
+    "@react-three/fiber": "^8.18.0",
+    "@remotion/cli": "^4.0.460",
+    "@remotion/three": "^4.0.460",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.460",
+    "three": "^0.171.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  }
+}
