@@ -52,7 +52,7 @@ jobs:
             libasound2t64
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install
 
       - name: Verify Remotion
         run: npx remotion versions
