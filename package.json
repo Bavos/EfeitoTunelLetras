@@ -1,5 +1,30 @@
-"scripts": {
-  "dev": "remotion studio",
-  "render": "remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=swangle --chromium-flag=\"--enable-unsafe-swiftshader\" --concurrency=1",
-  "render:ci": "xvfb-run -a npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=swangle --chromium-flag=\"--enable-unsafe-swiftshader\" --chromium-flag=\"--ignore-gpu-blocklist\" --chromium-flag=\"--disable-gpu-sandbox\" --chromium-flag=\"--disable-dev-shm-usage\" --concurrency=1 --timeout=600000"
+{
+  "name": "efeito-tunel-letras",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Remotion typography tunnel animation for Iamazing School",
+  "scripts": {
+    "dev": "remotion studio",
+    "render": "remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=swangle --chromium-flag=\"--enable-unsafe-swiftshader\" --concurrency=1",
+    "render:ci": "xvfb-run -a npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=swangle --chromium-flag=\"--enable-unsafe-swiftshader\" --chromium-flag=\"--ignore-gpu-blocklist\" --chromium-flag=\"--disable-gpu-sandbox\" --chromium-flag=\"--disable-dev-shm-usage\" --concurrency=1 --timeout=600000"
+  },
+  "dependencies": {
+    "@react-three/drei": "^9.121.4",
+    "@react-three/fiber": "^8.17.10",
+    "@remotion/three": "^4.0.340",
+    "remotion": "^4.0.340",
+    "three": "^0.170.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.340",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@types/three": "^0.170.0",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
 }
