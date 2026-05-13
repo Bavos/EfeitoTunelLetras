@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-
   workflow_dispatch:
 
 permissions:
@@ -15,6 +14,9 @@ jobs:
     name: Render MP4
     runs-on: ubuntu-latest
 
+    env:
+      REMOTION_CHROMIUM_FLAGS: "--enable-unsafe-swiftshader --ignore-gpu-blocklist --disable-gpu-sandbox --disable-dev-shm-usage"
+
     steps:
       - name: Checkout MAIN
         uses: actions/checkout@v4
@@ -24,7 +26,7 @@ jobs:
       - name: Validate MAIN branch
         run: |
           if [ "${GITHUB_REF_NAME}" != "main" ]; then
-            echo "❌ Este workflow só pode rodar na MAIN."
+            echo "Este workflow só pode rodar na MAIN."
             exit 1
           fi
 
@@ -52,24 +54,24 @@ jobs:
             libasound2t64
 
       - name: Install npm dependencies
-        run: npm install
-
-      - name: Verify Remotion
-        run: npx remotion versions
+        run: npm ci
 
       - name: Create output directory
         run: mkdir -p out
 
       - name: Render video
         run: |
-          xvfb-run -a \
-          npx remotion render \
-          src/index.ts \
-          IamazingTunnel \
-          out/iamazing-tunnel.mp4 \
-          --gl=angle \
-          --concurrency=1 \
-          --timeout=600000
+          xvfb-run -a npx remotion render \
+            src/index.ts \
+            IamazingTunnel \
+            out/iamazing-tunnel.mp4 \
+            --gl=swangle \
+            --chromium-flag="--enable-unsafe-swiftshader" \
+            --chromium-flag="--ignore-gpu-blocklist" \
+            --chromium-flag="--disable-gpu-sandbox" \
+            --chromium-flag="--disable-dev-shm-usage" \
+            --concurrency=1 \
+            --timeout=600000
 
       - name: Verify rendered file
         run: |
