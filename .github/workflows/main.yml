@@ -1,0 +1,50 @@
+name: Render Remotion Video
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    name: Render MP4
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Validate branch is main
+        run: |
+          if [ "${GITHUB_REF_NAME}" != "main" ]; then
+            echo "Este workflow só pode rodar na branch main."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Render video
+        run: npm run render
+
+      - name: Upload rendered MP4
+        uses: actions/upload-artifact@v4
+        with:
+          name: iamazing-school-remotion-render
+          path: |
+            out/**/*.mp4
+            dist/**/*.mp4
+            build/**/*.mp4
+          if-no-files-found: error
