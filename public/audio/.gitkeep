@@ -1,2 +1,0 @@
-# Audio assets are generated locally by `npm run generate:audio`.
-# Binary WAV/MP3 files are intentionally ignored to keep Git diffs text-only.
