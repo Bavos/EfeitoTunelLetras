@@ -1,22 +1,16 @@
-import {COLORS} from './utils/constants';
+import React from 'react';
+import {Color} from 'three';
+import {CYAN, DEEP_BLUE, SOFT_CYAN} from './constants';
 
-export const Lighting = () => {
+export const Lighting: React.FC = () => {
   return (
     <>
-      <color attach="background" args={[COLORS.background]} />
-      <fog attach="fog" args={[COLORS.navyFog, 8, 42]} />
-      <ambientLight color="#113b72" intensity={0.45} />
-      <directionalLight color="#eaf9ff" intensity={1.4} position={[3.2, 4.5, 8]} />
-      <pointLight color="#32dfff" intensity={58} distance={34} decay={2} position={[0, 0, 2]} />
-      <pointLight color="#74f4ff" intensity={24} distance={28} decay={2} position={[-4, 6, -11]} />
-      <spotLight
-        color="#dffaff"
-        intensity={4.5}
-        angle={0.38}
-        penumbra={0.86}
-        distance={44}
-        position={[0, 0.4, 7]}
-      />
+      <color attach="background" args={[DEEP_BLUE]} />
+      <fog attach="fog" args={[new Color('#041129'), 8, 34]} />
+      <ambientLight color="#5da6ff" intensity={0.55} />
+      <pointLight position={[0, 0, -6]} color={CYAN} intensity={3.8} distance={18} decay={1.8} />
+      <pointLight position={[-4.8, 3.8, -11]} color="#2c7fff" intensity={1.2} distance={22} decay={2} />
+      <pointLight position={[4.2, -3.2, -15]} color={SOFT_CYAN} intensity={1.1} distance={24} decay={2} />
     </>
   );
 };

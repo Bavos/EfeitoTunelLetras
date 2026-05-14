@@ -1,52 +1,23 @@
-# Efeito Túnel de Letras — Iamazing School
+# Iamazing School — Holographic Tunnel
 
-Projeto completo em **Remotion + React + React Three Fiber + Three.js + TypeScript** para gerar um vídeo vertical cinematográfico 9:16 com um túnel holográfico de palavras tecnológicas.
+Projeto Remotion + React Three Fiber + Three.js para gerar um vídeo vertical 9:16 com um túnel holográfico de palavras tecnológicas. As letras individuais convergem em espiral e formam a frase **“Iamazing School”** no centro da cena.
 
-A direção visual é inspirada em comerciais premium de tecnologia corporativa, com linguagem elegante tipo AWS, NVIDIA, IBM Quantum, Azure e OpenAI: azul profundo, glow ciano, partículas holográficas, profundidade 3D, câmera macro comprimida e pós-processamento cinematográfico.
+## Configuração do vídeo
 
-## Especificações do render
-
-- **Composição:** `IamazingTunnel`
-- **Resolução:** `1080x1920`
-- **Aspect ratio:** `9:16`
-- **FPS:** `30`
-- **Duração:** `8s` (`240` frames)
-- **Codec padrão:** MP4 H.264 com `yuv420p`
-- **Entrada Remotion:** `src/index.ts`
-
-## Stack técnica
-
-- Remotion
-- React
-- React Three Fiber
-- Three.js
-- `@react-three/drei`
-- `@react-three/postprocessing`
-- `postprocessing`
-- TypeScript
-
-## Estrutura principal
-
-```txt
-src/
- ├── Composition.tsx       # Registro da composição 1080x1920/30fps/8s
- ├── TunnelScene.tsx       # Cena 3D, túnel procedural, partículas e áudio opcional
- ├── WordParticle.tsx      # Palavra 3D individual com órbita helicoidal e ghost trails
- ├── CameraRig.tsx         # Dolly-in, camera roll e micro drifting cinematográfico
- ├── Lighting.tsx          # Luzes, fog e atmosfera azul/ciano
- ├── Effects.tsx           # Bloom, DOF, noise, aberração cromática e vinheta
- ├── hooks/
- ├── utils/
- └── shaders/
-```
+- Composition ID: `IamazingTunnel`
+- Resolução: `1080x1920`
+- FPS: `30`
+- Duração: `240 frames` / `8 segundos`
+- Output local: `out/iamazing-tunnel.mp4`
+- Codec: `h264`
 
 ## Instalação
 
 ```bash
-git clone <URL_DO_REPOSITORIO>
-cd EfeitoTunelLetras
 npm install
 ```
+
+O projeto usa `npm` e mantém `package-lock.json` versionado para builds reproduzíveis.
 
 ## Desenvolvimento
 
@@ -54,87 +25,48 @@ npm install
 npm run dev
 ```
 
-Abra o Remotion Studio e selecione a composição `IamazingTunnel`.
+Esse comando abre o Remotion Studio apontando para `src/index.ts`.
 
-## Render MP4 H.264
+## Render local
 
 ```bash
 npm run render
 ```
 
-Saída esperada:
+O render local usa `--gl=swangle`, `--enable-unsafe-swiftshader` e `--concurrency=1` para aumentar a compatibilidade de WebGL em ambientes sem GPU dedicada.
 
-```txt
+O arquivo final será gerado em:
+
+```text
 out/iamazing-tunnel.mp4
 ```
 
-> A pasta `out/` e arquivos renderizados são ignorados pelo Git para manter o repositório limpo.
+## Render no GitHub Actions
 
-## Render com áudio
+O workflow `.github/workflows/render.yml` roda automaticamente em `push` para a branch `main` e também pode ser executado manualmente em **Actions → Render Remotion Video → Run workflow**.
 
-Por regra do projeto, **binários não são versionados**. Para incluir trilha sonora:
+Após a execução, baixe o vídeo em **Artifacts** com o nome:
 
-1. Gere um áudio base procedural opcional:
-
-```bash
-npm run audio:synth
+```text
+iamazing-school-remotion-render
 ```
 
-2. Se quiser MP3, converta localmente o WAV gerado para MP3 com sua ferramenta preferida e salve em:
+O workflow valida que está rodando na `main`, instala dependências de sistema para Ubuntu, usa `xvfb`, renderiza com `--gl=swangle` e envia o MP4 como artifact.
 
-```txt
-public/audio/futuristic-ambience.mp3
+## Por que o MP4 não é commitado?
+
+Arquivos renderizados são binários, pesados e derivados do código-fonte. Por isso, `*.mp4`, `out/`, `dist/`, `build/` e caches ficam no `.gitignore`. O vídeo deve ser gerado localmente ou baixado como artifact do GitHub Actions.
+
+## Regra de branch
+
+Todo o desenvolvimento deste projeto deve acontecer exclusivamente na branch `main`. Não use branches secundárias como `dev`, `test`, `staging`, `feature`, `hotfix` ou `experimental`, porque o pipeline foi desenhado para renderizar e validar somente a MAIN.
+
+## Áudio opcional
+
+Para incluir uma trilha, adicione localmente:
+
+```text
+public/audio/ambient-tech.mp3
 ```
 
-3. Renderize com props:
-
-```bash
-npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 \
-  --codec h264 \
-  --pixel-format yuv420p \
-  --props='{"audioTrack":"audio/futuristic-ambience.mp3"}'
-```
-
-A cena já possui suporte à timeline de áudio via componente `<Audio />`; a trilha é opcional para que o repositório permaneça sem binários.
-
-## Workflow obrigatório na `main`
-
-Este repositório deve ser trabalhado diretamente na branch `main`:
-
-```bash
-git branch --show-current
-# main
-```
-
-Não crie branches `dev`, `test`, `staging`, `feature/*`, `hotfix/*` ou experimentais.
-
-## Como a animação é construída
-
-- As palavras secundárias são distribuídas por anéis em uma hélice 3D.
-- Cada palavra usa seno/cosseno para calcular `x`, `y` e profundidade `z`.
-- A câmera realiza um dolly-in contínuo, com roll mínimo e drift suave.
-- O túnel simula profundidade infinita reposicionando os anéis proceduralmente.
-- `Bloom`, `DepthOfField`, `Noise`, `ChromaticAberration` e `Vignette` criam o acabamento cinematográfico.
-- Ghost trails nas palavras simulam motion blur natural sem depender de arquivos externos.
-- Partículas instanciadas e geometria memoizada mantêm a renderização estável.
-
-## Validação
-
-```bash
-npm run validate
-npm run lint
-```
-
-## Regras de repositório
-
-O `.gitignore` bloqueia:
-
-- `node_modules/`
-- caches
-- builds
-- vídeos renderizados
-- áudio binário
-- arquivos temporários
-- `.env` e segredos
-
-Versione apenas código-fonte, documentação e assets leves essenciais.
+Se esse arquivo existir, o Remotion usa `Audio`. Se não existir, o render funciona sem áudio e sem falha.

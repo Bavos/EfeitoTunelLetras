@@ -1,99 +1,64 @@
+import React from 'react';
 import {Text} from '@react-three/drei';
-import {memo, useMemo} from 'react';
-import {AdditiveBlending, Color, Euler, Vector3} from 'three';
-import {TECHNOLOGY_WORDS, TUNNEL_SETTINGS} from './utils/constants';
+import {interpolate, useCurrentFrame} from 'remotion';
+import {CYAN} from './constants';
+import {stableRandom, tunnelPoint} from './utils/tunnel';
 
-export type WordParticleProps = {
-  ringIndex: number;
-  wordIndex: number;
-  frame: number;
-  cameraProgress: number;
+type WordParticleProps = {
+  word: string;
+  index: number;
 };
 
-const tunnelDepth = TUNNEL_SETTINGS.rings * TUNNEL_SETTINGS.depthSpacing;
+export const WordParticle: React.FC<WordParticleProps> = ({word, index}) => {
+  const frame = useCurrentFrame();
+  const depth = 30;
+  const baseAngle = index * 0.84 + stableRandom(index + 4) * Math.PI * 2;
+  const baseZ = stableRandom(index + 19) * depth;
+  const point = tunnelPoint({frame, index, baseAngle, baseZ, depth});
 
-export const WordParticle = memo(({ringIndex, wordIndex, frame, cameraProgress}: WordParticleProps) => {
-  const word = TECHNOLOGY_WORDS[wordIndex % TECHNOLOGY_WORDS.length];
-
-  const layout = useMemo(() => {
-    const baseAngle = (wordIndex / TUNNEL_SETTINGS.wordsPerRing) * Math.PI * 2;
-    const stagger = ringIndex * TUNNEL_SETTINGS.spiralTwist;
-    const radiusBias = 1 + Math.sin(ringIndex * 1.73 + wordIndex) * 0.055;
-    const depth = -ringIndex * TUNNEL_SETTINGS.depthSpacing - 4;
-
-    return {baseAngle, stagger, radiusBias, depth};
-  }, [ringIndex, wordIndex]);
-
-  const time = frame / 30;
-  const movingDepth = ((((layout.depth + cameraProgress) % tunnelDepth) + tunnelDepth) % tunnelDepth) - tunnelDepth;
-  const angle = layout.baseAngle + layout.stagger + time * 0.18 + Math.sin(time * 0.42 + ringIndex) * 0.035;
-  const radius = TUNNEL_SETTINGS.radius * layout.radiusBias + Math.sin(time + ringIndex * 0.31) * 0.18;
-
-  const position = new Vector3(
-    Math.cos(angle) * radius,
-    Math.sin(angle) * radius * 1.18,
-    movingDepth,
-  );
-
-  const rotation = new Euler(
-    Math.sin(time * 0.32 + wordIndex) * 0.08,
-    -angle + Math.PI / 2 + Math.sin(time * 0.21 + ringIndex) * 0.12,
-    Math.cos(time * 0.26 + ringIndex) * 0.1,
-  );
-
-  const nearCamera = Math.max(0, 1 - Math.abs(movingDepth + 2.4) / 8);
-  const opacity = Math.min(0.92, 0.22 + nearCamera * 0.62 + ringIndex * 0.006);
-  const size = word === 'Artificial Intelligence' || word === 'Machine Learning' ? 0.31 : 0.36;
-
-  const ghostOffset = 0.34;
-  const cyan = new Color('#38dcff');
-  const white = new Color('#f1fbff');
+  const nearCamera = interpolate(point.z, [-30, -2.5], [0.16, 0.72], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const titleProtection = interpolate(frame, [140, 210], [1, 0.35], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const opacity = nearCamera * titleProtection;
+  const scale = 0.12 + stableRandom(index + 55) * 0.07 + interpolate(point.z, [-30, -2.5], [0, 0.12], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
+  const blurGhostOffset = interpolate(point.z, [-9, -2.5], [0, 0.12], {
+    extrapolateLeft: 'clamp',
+    extrapolateRight: 'clamp',
+  });
 
   return (
-    <group position={position} rotation={rotation}>
-      {[2, 1].map((ghost) => (
-        <Text
-          key={ghost}
-          position={[0, 0, ghost * ghostOffset]}
-          fontSize={size}
-          anchorX="center"
-          anchorY="middle"
-          letterSpacing={0.018}
-          maxWidth={3.4}
-        >
-          {word}
-          <meshBasicMaterial
-            color={cyan}
-            transparent
-            opacity={opacity * (0.08 / ghost)}
-            blending={AdditiveBlending}
-            depthWrite={false}
-          />
-        </Text>
-      ))}
-
+    <group position={[point.x, point.y, point.z]} rotation={[0, 0, point.angle + Math.PI / 2]}>
       <Text
-        fontSize={size}
         anchorX="center"
         anchorY="middle"
-        letterSpacing={0.018}
-        maxWidth={3.5}
+        fontSize={scale}
+        maxWidth={3.2}
+        textAlign="center"
+        color={CYAN}
+        fillOpacity={opacity}
       >
         {word}
-        <meshStandardMaterial
-          color={white}
-          emissive={cyan}
-          emissiveIntensity={1.9 + nearCamera * 1.6}
-          transparent
-          opacity={opacity}
-          roughness={0.28}
-          metalness={0.05}
-          blending={AdditiveBlending}
-          depthWrite={false}
-        />
+        <meshBasicMaterial color={CYAN} transparent opacity={opacity} depthWrite={false} toneMapped={false} />
+      </Text>
+      <Text
+        anchorX="center"
+        anchorY="middle"
+        fontSize={scale * 1.04}
+        position={[blurGhostOffset, -blurGhostOffset * 0.45, 0.01]}
+        color="#c9feff"
+        fillOpacity={opacity * 0.22}
+      >
+        {word}
+        <meshBasicMaterial color="#c9feff" transparent opacity={opacity * 0.22} depthWrite={false} toneMapped={false} />
       </Text>
     </group>
   );
-});
-
-WordParticle.displayName = 'WordParticle';
+};

@@ -1,14 +1,13 @@
-# Trilha sonora opcional
+# Áudio opcional
 
-Coloque aqui a trilha local `futuristic-ambience.mp3` para renderização com áudio:
+Coloque aqui um arquivo chamado `ambient-tech.mp3` caso queira adicionar trilha ao vídeo:
 
-```bash
-public/audio/futuristic-ambience.mp3
+```text
+public/audio/ambient-tech.mp3
 ```
 
-Arquivos de áudio binários são ignorados por `.gitignore` para manter o repositório leve e próprio para GitHub. Para ativar a trilha no render, use props Remotion:
+O componente Remotion verifica os arquivos estáticos disponíveis. Se `ambient-tech.mp3` existir, ele é usado com volume suave; se não existir, o render continua normalmente sem erro.
 
-```bash
-npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 \
-  --props='{"audioTrack":"audio/futuristic-ambience.mp3"}'
-```
+Sugestão de ambiência: hum eletrônico suave, glitches digitais discretos, whooshes leves e atmosfera tecnológica premium.
+
+Não commite MP3s ou outros arquivos de áudio pesados neste repositório.
