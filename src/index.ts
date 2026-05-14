@@ -1,4 +1,4 @@
 import {registerRoot} from 'remotion';
-import {Composition} from './Composition';
+import {RemotionRoot} from './Composition';
 
-registerRoot(Composition);
+registerRoot(RemotionRoot);

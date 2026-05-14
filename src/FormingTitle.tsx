@@ -1,107 +1,117 @@
+import React from 'react';
 import {Text} from '@react-three/drei';
-import {interpolate, useCurrentFrame} from 'remotion';
-import {AdditiveBlending, Color} from 'three';
-import {COLORS} from './constants';
+import {interpolate, spring, useCurrentFrame} from 'remotion';
+import {CYAN, FPS, SOFT_CYAN, TITLE} from './constants';
+import {stableRandom} from './utils/tunnel';
 
-const TITLE = 'Iamazing School';
-const startFrame = 80;
+const startFrame = 60;
 const endFrame = 190;
-const titleCharacters = TITLE.split('');
-const cyan = new Color(COLORS.cyan);
-const white = new Color(COLORS.white);
+const letterSpacing = 0.36;
+const wordGap = 0.78;
+const finalZ = -8;
+const finalY = 0;
+const finalScale = 0.31;
 
-const easeInOutCubic = (value: number) => (value < 0.5 ? 4 * value * value * value : 1 - Math.pow(-2 * value + 2, 3) / 2);
-
-const getFinalX = (index: number) => {
-  const totalWidth = titleCharacters.reduce((width, character) => width + (character === ' ' ? 0.34 : 0.42), 0);
-  const leftEdge = -totalWidth / 2;
-  const previousWidth = titleCharacters.slice(0, index).reduce((width, character) => width + (character === ' ' ? 0.34 : 0.42), 0);
-  const currentWidth = titleCharacters[index] === ' ' ? 0.34 : 0.42;
-
-  return leftEdge + previousWidth + currentWidth / 2;
+type TitleLetter = {
+  char: string;
+  sourceIndex: number;
+  finalX: number;
 };
 
-const getInitialPosition = (index: number): [number, number, number] => {
-  const angle = index * 1.37 + Math.sin(index * 0.61) * 0.45;
-  const radius = 3.15 + (index % 5) * 0.36;
-  const depth = 8.5 + (index % 7) * 3.7;
+const buildLetters = (): TitleLetter[] => {
+  let cursor = 0;
+  const measured = TITLE.split('').map((char) => {
+    if (char === ' ') {
+      const slot = {char, x: cursor};
+      cursor += wordGap;
+      return slot;
+    }
 
-  return [Math.cos(angle) * radius, Math.sin(angle) * radius * 1.42, -depth];
+    const slot = {char, x: cursor};
+    cursor += letterSpacing;
+    return slot;
+  });
+
+  const totalWidth = cursor - letterSpacing;
+  const centerOffset = totalWidth / 2;
+
+  return measured
+    .map((slot, sourceIndex) => ({
+      char: slot.char,
+      sourceIndex,
+      finalX: slot.x - centerOffset,
+    }))
+    .filter((slot) => slot.char !== ' ');
 };
 
-const lerp = (from: number, to: number, progress: number) => from + (to - from) * progress;
+const LETTERS = buildLetters();
 
-export const FormingTitle = () => {
+export const FormingTitle: React.FC = () => {
   const frame = useCurrentFrame();
   const rawProgress = interpolate(frame, [startFrame, endFrame], [0, 1], {
     extrapolateLeft: 'clamp',
     extrapolateRight: 'clamp',
   });
-  const progress = easeInOutCubic(rawProgress);
-  const breathing = frame >= endFrame ? Math.sin((frame - endFrame) / 18) * 0.035 : 0;
-  const shimmer = interpolate(Math.sin(frame / 16), [-1, 1], [0.82, 1.18]);
-  const groupScale = 1.46 + progress * 0.16 + breathing;
+
+  const easedProgress = spring({
+    frame: frame - startFrame,
+    fps: FPS,
+    config: {
+      damping: 18,
+      stiffness: 70,
+      mass: 0.9,
+    },
+  });
+
+  const progress = Math.min(1, Math.max(0, easedProgress));
+  const composedProgress = Math.min(1, Math.max(rawProgress * 0.92, progress * 0.98));
+  const breathing = frame > endFrame ? 1 + Math.sin(frame * 0.04) * 0.015 : 1;
 
   return (
-    <group position={[0, 0, -8.85]} scale={groupScale} rotation={[0, Math.sin(frame / 110) * 0.025 * (1 - progress), Math.sin(frame / 128) * 0.018]}>
-      {titleCharacters.map((character, index) => {
-        const [startX, startY, startZ] = getInitialPosition(index);
-        const finalX = getFinalX(index);
-        const finalY = 0;
-        const finalZ = 0;
-        const x = lerp(startX, finalX, progress);
-        const y = lerp(startY, finalY, progress);
-        const z = lerp(startZ, finalZ, progress);
-        const startRotationY = Math.sin(index * 1.11) * 1.15;
-        const startRotationZ = Math.cos(index * 0.83) * 0.72;
-        const opacity = interpolate(frame, [0, startFrame, endFrame], [0.38, 0.58, 0.96], {
+    <group position={[0, 0, 0]}>
+      {LETTERS.map(({char, sourceIndex, finalX}, index) => {
+        const swirl = frame * 0.025;
+        const startX = Math.cos(index * 1.7 + swirl) * 5.5;
+        const startY = Math.sin(index * 1.3 + swirl) * 4.2;
+        const startZ = -18 - index * 0.7;
+
+        const x = interpolate(composedProgress, [0, 1], [startX, finalX]);
+        const y = interpolate(composedProgress, [0, 1], [startY, finalY]);
+        const z = interpolate(composedProgress, [0, 1], [startZ, finalZ]);
+
+        const initialRotX = (stableRandom(sourceIndex + 100) - 0.5) * 1.4;
+        const initialRotY = (stableRandom(sourceIndex + 200) - 0.5) * 1.8;
+        const initialRotZ = (stableRandom(sourceIndex + 300) - 0.5) * 1.1;
+        const rotationX = interpolate(composedProgress, [0, 1], [initialRotX, 0]);
+        const rotationY = interpolate(composedProgress, [0, 1], [initialRotY, 0]);
+        const rotationZ = interpolate(composedProgress, [0, 1], [initialRotZ, 0]);
+
+        const opacity = interpolate(frame, [startFrame - 18, startFrame + 34, endFrame], [0.18, 0.72, 1], {
           extrapolateLeft: 'clamp',
           extrapolateRight: 'clamp',
         });
-        const glow = interpolate(progress, [0, 1], [0.55, 1.65]);
-
-        if (character === ' ') {
-          return null;
-        }
+        const scale = finalScale * breathing * interpolate(composedProgress, [0, 1], [0.76, 1]);
 
         return (
-          <group
-            key={`${character}-${index}`}
-            position={[x, y, z]}
-            rotation={[Math.sin(frame / 34 + index) * 0.05 * (1 - progress), lerp(startRotationY, 0, progress), lerp(startRotationZ, 0, progress)]}
-          >
+          <group key={`${char}-${sourceIndex}`} position={[x, y, z]} rotation={[rotationX, rotationY, rotationZ]}>
             <Text
               anchorX="center"
               anchorY="middle"
-              fontSize={0.62}
+              fontSize={scale * 1.95}
               letterSpacing={0}
-              outlineBlur={0.026 + glow * 0.008}
-              outlineColor={COLORS.cyan}
-              outlineOpacity={0.34 + progress * 0.24}
+              color={SOFT_CYAN}
+              fillOpacity={opacity * 0.16}
             >
-              {character}
-              <meshStandardMaterial
-                color={white.clone().lerp(cyan, 0.22)}
-                emissive={cyan}
-                emissiveIntensity={(1.35 + glow) * shimmer}
-                roughness={0.34}
-                metalness={0.18}
-                transparent
-                opacity={opacity}
-                depthWrite={false}
-              />
+              {char}
+              <meshBasicMaterial color={SOFT_CYAN} transparent opacity={opacity * 0.16} depthWrite={false} toneMapped={false} />
             </Text>
-            <mesh position={[0, 0, -0.035]} scale={[0.62 + progress * 0.16, 0.82 + progress * 0.08, 1]}>
-              <planeGeometry args={[1, 1]} />
-              <meshBasicMaterial color={COLORS.cyan} transparent opacity={(0.055 + progress * 0.06) * shimmer} blending={AdditiveBlending} depthWrite={false} />
-            </mesh>
+            <Text anchorX="center" anchorY="middle" fontSize={scale} color={CYAN} fillOpacity={opacity}>
+              {char}
+              <meshBasicMaterial color={CYAN} transparent opacity={opacity} depthWrite={false} toneMapped={false} />
+            </Text>
           </group>
         );
       })}
-      <mesh position={[0, -0.56, -0.04]} scale={[4.95, 0.028, 1]}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial color={COLORS.cyan} transparent opacity={progress * 0.34 * shimmer} blending={AdditiveBlending} depthWrite={false} />
-      </mesh>
     </group>
   );
 };

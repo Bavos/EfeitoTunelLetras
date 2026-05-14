@@ -14,6 +14,10 @@ jobs:
     name: Render MP4
     runs-on: ubuntu-latest
 
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      REMOTION_CHROMIUM_FLAGS: "--enable-unsafe-swiftshader --ignore-gpu-blocklist --disable-gpu-sandbox --disable-dev-shm-usage"
+
     steps:
       - name: Checkout MAIN
         uses: actions/checkout@v4
@@ -35,20 +39,49 @@ jobs:
       - name: Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y xvfb libgl1-mesa-dri libgl1-mesa-glx libegl1 libgles2 mesa-utils
+          sudo apt-get install -y \
+            xvfb \
+            mesa-utils \
+            libgl1 \
+            libegl1 \
+            libgles2 \
+            libx11-6 \
+            libxext6 \
+            libxi6 \
+            libxrender1 \
+            libxtst6 \
+            libnss3 \
+            libxss1 \
+            libasound2t64
 
       - name: Install npm dependencies
-        run: npm ci
+        run: npm install
 
-      - name: Verify Remotion
-        run: npx remotion versions
+      - name: Create output directory
+        run: mkdir -p out
 
       - name: Render video
-        run: xvfb-run -a npx remotion render src/index.ts IamazingTunnel out/iamazing-tunnel.mp4 --gl=swangle --concurrency=1 --timeout=600000
+        run: |
+          xvfb-run -a npx remotion render \
+            src/index.ts \
+            IamazingTunnel \
+            out/iamazing-tunnel.mp4 \
+            --gl=swangle \
+            --chromium-flag="--enable-unsafe-swiftshader" \
+            --chromium-flag="--ignore-gpu-blocklist" \
+            --chromium-flag="--disable-gpu-sandbox" \
+            --chromium-flag="--disable-dev-shm-usage" \
+            --concurrency=1 \
+            --timeout=600000
+
+      - name: Verify rendered file
+        run: |
+          ls -lah out
+          test -f out/iamazing-tunnel.mp4
 
       - name: Upload rendered MP4
         uses: actions/upload-artifact@v4
         with:
           name: iamazing-school-remotion-render
-          path: out/**/*.mp4
+          path: out/iamazing-tunnel.mp4
           if-no-files-found: error

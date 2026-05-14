@@ -1,8 +1,6 @@
 import {Config} from '@remotion/cli/config';
 
-Config.setVideoImageFormat('jpeg');
+Config.setVideoImageFormat('png');
 Config.setOverwriteOutput(true);
-Config.setPixelFormat('yuv420p');
+Config.setChromiumOpenGlRenderer('swangle');
 Config.setCodec('h264');
-Config.setChromiumOpenGlRenderer('angle');
-Config.setConcurrency(2);
